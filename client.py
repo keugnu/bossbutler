@@ -19,6 +19,6 @@ class Client(discord.Client):
             self.rcv_time = message.created_at
             guild = message.guild
             vc = await guild.create_voice_channel(name='wboss-encounter')
-            members = discord.utils.get(guild.voice_channels, name='General').members
+            members = discord.utils.get(guild.voice_channels, name='Wake for World Bosses').members
             for member in members:
                 await member.move_to(vc)
