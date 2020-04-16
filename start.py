@@ -1,31 +1,51 @@
 import os
+import logging
+import shutil
+import sys
+
 from dotenv import load_dotenv
+from discord.ext import commands
 
-from discord.ext import tasks
+import utils
 
-from client import Client
-
-def find(path, name):
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            return os.path.join(root, name)
+from cog import alerts, settings, control
 
 
-dotenv_path = find(os.path.dirname(__file__), '.env')
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+log = logging.getLogger('bossbutler')
+dotenv_path = utils.find(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
-client = Client()
 
 
-@tasks.loop(seconds=30)
-async def check_channel():
-    await client.wait_until_ready()
-    for guild in client.guilds:
-        for channel in guild.voice_channels:
-            vc = channel if channel.name == 'wboss-encounter' else None
-        if vc and not vc.members:
-            await vc.delete()
+class Bot(commands.Bot):
+    def __init__(self, pfx):
+        super().__init__(command_prefix=pfx)
+
+        self.yt_title, self.yt_file = utils.download_yt()
+        self.ffmpeg = shutil.which('ffmpeg')
+        self.wakeup = 'wakeup-call'
 
 
-check_channel.start()
-client.run(token)
+bot = Bot(pfx='!')
+any(map(bot.add_cog, (alerts.Alerts(bot), settings.Settings(bot), control.Control(bot))))
+
+
+@bot.event
+async def on_disconnect():
+    log.info('Removing last video file before disconnecting.')
+    os.remove(bot.yt_file)
+
+
+@bot.event
+async def on_ready():
+    guilds = await bot.fetch_guilds().flatten()
+    log.info(f'I have connected to {", ".join([g.name for g in guilds])}')
+
+
+try:
+    bot.loop.run_until_complete(bot.start(token))
+except (SystemExit, KeyboardInterrupt):
+    log.info('Removing last video file before disconnecting.')
+    os.remove(bot.yt_file)
+    bot.loop.close()

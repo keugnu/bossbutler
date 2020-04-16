@@ -1,24 +1,15 @@
-import datetime
-import discord
+import shutil
+import os
+import logging
+from discord.ext import commands
+
+import utils
 
 
-class Client(discord.Client):
-    def __init__(self):
-        super().__init__()
+class Bot(commands.Bot):
+    def __init__(self, pfx):
+        super().__init__(command_prefix=pfx)
 
-        self.rcv_time = datetime.datetime(1, 1, 1)
-
-    async def on_message(self, message):
-        if not message.channel.name == 'world-boss-alerts':
-            return
-        if not message.mention_everyone:
-            return
-        if message.created_at < self.rcv_time + datetime.timedelta(minutes=30):
-            return
-        else:
-            self.rcv_time = message.created_at
-            guild = message.guild
-            vc = await guild.create_voice_channel(name='wboss-encounter')
-            members = discord.utils.get(guild.voice_channels, name='Wake for World Bosses').members
-            for member in members:
-                await member.move_to(vc)
+        self.yt_title, self.yt_file = utils.download_yt()
+        self.ffmpeg = shutil.which('ffmpeg')
+        self.wakeup = 'wakeup-call'
