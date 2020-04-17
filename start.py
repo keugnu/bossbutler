@@ -15,7 +15,7 @@ bot = Bot(pfx='!')
 
 @bot.event
 async def on_disconnect():
-    log.info('Removing last video file before disconnecting.')
+    log.warning('Removing last video file before disconnecting.')
     os.remove(bot.yt_file)
 
 

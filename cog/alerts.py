@@ -24,6 +24,7 @@ class Alerts(commands.Cog):
         vc.play(discord.FFmpegPCMAudio(self.bot.yt_file, executable=self.bot.ffmpeg))
 
     async def _stop_alarm(self, ctx):
+        await ctx.send(f'Stopping the alarms now!')
         await self.bot.get_command('stop').invoke(ctx)
 
     async def action(self, ctx, status):
@@ -46,6 +47,7 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def azu(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Azuregos is {status}!')
         await self.action(ctx, status)
@@ -56,6 +58,7 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def kazz(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Kazzak is {status}!')
         await self.action(ctx, status)
@@ -66,6 +69,7 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def emer(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Emeriss is {status}!')
         await self.action(ctx, status)
@@ -76,6 +80,7 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def leth(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Lethon is {status}!')
         await self.action(ctx, status)
@@ -86,6 +91,7 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def taer(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Taerar is {status}!')
         await self.action(ctx, status)
@@ -96,14 +102,18 @@ class Alerts(commands.Cog):
         enabled=False,
     )
     async def yson(self, ctx, status, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Ysondre is {status}!')
         await self.action(ctx, status)
 
     @commands.command()
     async def up(self, ctx):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
+        await ctx.send(f'Moving to {self.bot.wakeup} to alert everyone!')
         self.log.info(f'{ctx.author.name} says a boss is up!')
         if not self.bot.wakeup:
-            await ctx.send(f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.')
-            raise commands.CommandError(f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.')
+            msg = f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.'
+            await ctx.send(msg)
+            raise commands.CommandError(msg)
         await self._start_alarm(ctx)
