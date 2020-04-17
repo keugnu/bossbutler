@@ -1,7 +1,6 @@
 import os
 import logging
 
-import discord
 from discord.ext import commands
 
 import utils

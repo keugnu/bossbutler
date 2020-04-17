@@ -15,5 +15,5 @@ class Bot(commands.Bot):
         self.wakeup = 'wakeup-call'
 
     @staticmethod
-    def add_cogs(self):
-        any(map(self.add_cog, (alerts.Alerts(self), settings.Settings(self), control.Control(self))))
+    def add_cogs(bot):
+        any(map(bot.add_cog, (alerts.Alerts(bot), settings.Settings(bot), control.Control(bot))))

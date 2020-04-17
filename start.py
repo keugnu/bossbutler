@@ -26,8 +26,10 @@ async def on_ready():
 
 
 try:
-    bot.add_cogs()
+    bot.add_cogs(bot)
+    log.info('Starting...')
     bot.loop.run_until_complete(bot.start(token))
-except (SystemExit, KeyboardInterrupt):
+except (SystemExit, KeyboardInterrupt) as e:
+    log.critical(f'Encountered {type(e)}: {e}. Stopping!')
     bot.loop.run_until_complete(bot.logout())
     bot.loop.close()
