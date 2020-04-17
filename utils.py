@@ -11,7 +11,7 @@ def setup_log():
     log = logging.getLogger('bossbutler')
     log.setLevel(logging.DEBUG)
     try:
-        handler = handlers.TimedRotatingFileHandler('/var/log/bossbutler.log', when='d')
+        handler = handlers.TimedRotatingFileHandler('/var/log/bossbutler/bossbutler.log', when='d')
     except FileNotFoundError:
         handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(logging.DEBUG)
