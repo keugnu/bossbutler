@@ -1,7 +1,6 @@
 import os
 import logging
 import shutil
-import sys
 
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -11,8 +10,13 @@ import utils
 from cog import alerts, settings, control
 
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 log = logging.getLogger('bossbutler')
+log.setLevel(logging.DEBUG)
+handler = logging.handlers.TimedRotatingFileHandler('/var/log/bossbutler.log', when='d')
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(name)s:%(levelname)s:%(message)s')
+handler.setFormatter(formatter)
+log.addHandler(handler)
 dotenv_path = utils.find(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
