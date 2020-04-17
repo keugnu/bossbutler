@@ -1,6 +1,18 @@
 import os
+import logging
 
 from pytube import YouTube
+
+
+def setup_log():
+    log = logging.getLogger('bossbutler')
+    log.setLevel(logging.DEBUG)
+    handler = logging.handlers.TimedRotatingFileHandler('/var/log/bossbutler.log', when='d')
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(name)s:%(levelname)s:%(message)s')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+    return log
 
 
 def download_yt(link=None):
