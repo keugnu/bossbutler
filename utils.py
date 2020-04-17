@@ -22,11 +22,9 @@ def setup_log():
 
 
 def download_yt(link=None):
-    if not link:
-        yt = YouTube('https://www.youtube.com/watch?v=eh7lp9umG2I')
-        return yt.title, yt.streams.first().download()
-    yt = YouTube('https://www.youtube.com/watch?v=eh7lp9umG2I')
-    return yt.title, yt.streams.first().download()
+    path = os.path.join(os.path.dirname(__file__), 'videos')
+    yt = YouTube(link) if link else YouTube('https://www.youtube.com/watch?v=eh7lp9umG2I')
+    return yt.title, yt.streams.first().download(output_path=path)
 
 
 def find(path, name):
