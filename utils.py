@@ -10,7 +10,10 @@ from pytube import YouTube
 def setup_log():
     log = logging.getLogger('bossbutler')
     log.setLevel(logging.DEBUG)
-    handler = logging.handlers.TimedRotatingFileHandler('/var/log/bossbutler.log', when='d')
+    try:
+        handler = handlers.TimedRotatingFileHandler('/var/log/bossbutler.log', when='d')
+    except FileNotFoundError:
+        handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(name)s:%(levelname)s:%(message)s')
     handler.setFormatter(formatter)
