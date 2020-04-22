@@ -113,7 +113,7 @@ class Alerts(commands.Cog):
     @commands.command()
     async def up(self, ctx):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        self.log.info(f'{ctx.author.name} says a boss is up!')
+        self.log.info(f'{ctx.author.nick} says a boss is up!')
         if not self.bot.wakeup:
             msg = f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.'
             await ctx.send(msg)
