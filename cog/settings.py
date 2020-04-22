@@ -39,7 +39,7 @@ class Settings(commands.Cog):
         msg = f'Setting wakeup channel to: {name}.'
         await ctx.send(msg)
         self.log.info(msg)
-        self.bot.wakeup = name.lower()
+        self.bot.wakeup = name
 
     @commands.command()
     @commands.guild_only()

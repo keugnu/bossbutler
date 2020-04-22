@@ -21,7 +21,7 @@ class Alerts(commands.Cog):
         if not self.bot.wakeup:
             ctx.send(f"I don't know which channel to join! Please set it with {self.bot.command_prefix}wakeup.")
             raise commands.CommandError('Wakeup channel not set.')
-        self.log.info(f'Joining voice channel "{self.bot.wakeup}..."')
+        self.log.info(f'Joining voice channel "{self.bot.wakeup}."')
         vc = await discord.utils.get(ctx.guild.voice_channels, name=self.bot.wakeup).connect()
         self.log.info(f'Begining to play alarm: "{self.bot.yt_file}"')
         vc.play(discord.FFmpegPCMAudio(self.bot.yt_file, executable=self.bot.ffmpeg))

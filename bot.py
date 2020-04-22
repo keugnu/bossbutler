@@ -14,7 +14,7 @@ class Bot(commands.Bot):
         self.yt_title = None
         self.yt_file = None
         self.ffmpeg = shutil.which('ffmpeg')
-        self.wakeup = None
+        self.wakeup = 'Wake Up Call'
 
     @staticmethod
     def add_cogs(bot):
