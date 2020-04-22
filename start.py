@@ -22,12 +22,6 @@ async def on_disconnect():
     os.remove(bot.yt_file)
 
 
-#@bot.event
-#async def on_ready():
-#    guilds = await bot.fetch_guilds().flatten()
-#    log.info(f'I have connected to {", ".join([g.name for g in guilds])}')
-
-
 @bot.event
 async def on_ready():
     guilds = await bot.fetch_guilds().flatten()
