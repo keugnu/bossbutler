@@ -22,9 +22,12 @@ def setup_log():
 
 
 def download_yt(link=None):
+    log = logging.getLogger('bossbutler')
     path = os.path.join(os.path.dirname(__file__), 'videos')
-    yt = YouTube(link) if link else YouTube('https://www.youtube.com/watch?v=eh7lp9umG2I')
-    return yt.title, yt.streams.first().download(output_path=path)
+    yt = YouTube(link) if link else YouTube('https://www.youtube.com/watch?v=ZZ5LpwO-An4')
+    stream = yt.streams.first().download(output_path=path)
+    log.info(f'Downloaded {yt.title} successfully.')
+    return yt.watch_url, yt.title, stream
 
 
 def find(path, name):

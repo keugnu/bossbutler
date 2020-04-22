@@ -59,7 +59,7 @@ class Settings(commands.Cog):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         try:
             yt = self.bot.yt_file
-            self.bot.yt_title, self.bot.yt_file = utils.download_yt(link)
+            self.bot.yt_url, self.bot.yt_title, self.bot.yt_file = utils.download_yt(link)
             msg = f'Set alarm to: {self.bot.yt_title}'
             await ctx.send(msg)
             self.log.info(msg)
