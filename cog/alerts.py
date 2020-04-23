@@ -19,8 +19,12 @@ class Alerts(commands.Cog):
 
     async def _start_alarm(self, ctx):
         if not self.bot.wakeup:
-            ctx.send(f"I don't know which channel to join! Please set it with {self.bot.command_prefix}wakeup.")
+            await ctx.send(f"I don't know which channel to join! Please set it with {self.bot.command_prefix}wakeup.")
             raise commands.CommandError('Wakeup channel not set.')
+        if not self.bot.announcements:
+            await ctx.send(f"I don't know which channel to notify! Please set it with {self.bot.command_prefix}announcements.")
+        ch_announce = discord.utils.get(ctx.guild.channels, name=self.bot.announcements)
+        await ch_announce.send(f'@here {ctx.author.nick or ctx.author.name} says a boss is up!')
         self.log.info(f'Joining voice channel "{self.bot.wakeup}."')
         vc = await discord.utils.get(ctx.guild.voice_channels, name=self.bot.wakeup).connect()
         self.log.info(f'Begining to play alarm: "{self.bot.yt_file}"')
@@ -113,7 +117,7 @@ class Alerts(commands.Cog):
     @commands.command()
     async def up(self, ctx):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        self.log.info(f'{ctx.author.nick} says a boss is up!')
+        self.log.info(f'{ctx.author.nick or ctx.author.name} says a boss is up!')
         if not self.bot.wakeup:
             msg = f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.'
             await ctx.send(msg)

@@ -31,25 +31,28 @@ class Settings(commands.Cog):
         self.log.info(msg)
         await self._change_alarm(ctx, link)
 
+    # this could be used if we want the bot to just watch a channel for keywords
     @commands.command(enabled=False)
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def watch(self, ctx, name: str):
+    async def watch(self, ctx, *name: str):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        msg = f'Setting watch channel to: {name}.'
+        ch = await valid_channel(ctx, name)
+        msg = f'Setting watch channel to: {ch}.'
         await ctx.send(msg)
         self.log.info(msg)
-        self.bot.watch = name.lower()
+        self.bot.watch = ch
 
-    @commands.command()
+    @commands.command(aliases=['wakeup-channel'])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def wakeup(self, ctx, name: str):
+    async def wakeup(self, ctx, *name):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        msg = f'Setting wakeup channel to: {name}.'
+        ch = await valid_channel(ctx, name)
+        msg = f'Setting wakeup channel to: {ch}.'
         await ctx.send(msg)
         self.log.info(msg)
-        self.bot.wakeup = name
+        self.bot.wakeup = ch
 
     @commands.command()
     @commands.guild_only()
@@ -64,6 +67,14 @@ class Settings(commands.Cog):
             await ctx.send(msg)
             self.log.info(msg)
             self.bot.command_prefix = char
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def announcements(self, ctx, *name):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
+        ch = await valid_channel(ctx, name)
+        await ctx.send(f'Setting the channel for announcements to {ch}.')
+        self.bot.announcements = ch
 
     async def _change_alarm(self, ctx, link):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
