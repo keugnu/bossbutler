@@ -1,3 +1,4 @@
+import os
 import shutil
 
 from discord.ext import commands
@@ -14,7 +15,10 @@ class Bot(commands.Bot):
         self.yt_title = None
         self.yt_file = None
         self.ffmpeg = shutil.which('ffmpeg')
-        self.wakeup = 'Wake Up Call'
+        self.wakeup = None
+        self.announcements = None
+
+        assert os.path.exists(self.ffmpeg)
 
     @staticmethod
     def add_cogs(bot):
