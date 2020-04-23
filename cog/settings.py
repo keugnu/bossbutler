@@ -1,10 +1,20 @@
 import os
 import logging
 
+import discord
 from discord.ext import commands
 
 import utils
 
+
+async def valid_channel(ctx, name):
+    ch = ' '.join(name)
+    try:
+        assert discord.utils.get(ctx.guild.channels, name=ch)
+    except AssertionError:
+        await ctx.send(f"{ch} doesn't seem to be a valid channel in this server. Check the name and try again.")
+        raise commands.CommandError(f'{ch} is not a valid channel name.')
+    return ch
 
 class Settings(commands.Cog):
     def __init__(self, bot):
