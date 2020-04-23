@@ -9,13 +9,17 @@ from pytube import YouTube
 
 def setup_log():
     log = logging.getLogger('bossbutler')
-    log.setLevel(logging.DEBUG)
-    try:
-        handler = handlers.TimedRotatingFileHandler('/var/log/bossbutler/bossbutler.log', when='d')
-    except FileNotFoundError:
-        handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s %(name)s:%(levelname)s:%(message)s')
+
+    if not sys.stdin.isatty():
+        handler = handlers.TimedRotatingFileHandler('/var/log/bossbutler/bossbutler.log', when='d')
+        handler.setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
+    else:
+        handler = logging.StreamHandler(sys.stderr)
+        handler.setLevel(logging.DEBUG)
+        log.setLevel(logging.DEBUG)
+
     handler.setFormatter(formatter)
     log.addHandler(handler)
     return log
@@ -31,6 +35,6 @@ def download_yt(link=None):
 
 
 def find(path, name):
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         if name in files:
             return os.path.join(root, name)
