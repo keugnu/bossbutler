@@ -123,3 +123,10 @@ class Alerts(commands.Cog):
             await ctx.send(msg)
             raise commands.CommandError(msg)
         await self._start_alarm(ctx)
+
+    @commands.command()
+    async def whisper(self, ctx, *names):
+        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
+        self.log.info(f'{ctx.author.nick} says to whisper {", ".join(names)} for invites.')
+        channel = discord.utils.get(ctx.guild.channels, name=self.bot.announcements)
+        await channel.send(f'@here Whisper {", ".join(names)} for invites!')
