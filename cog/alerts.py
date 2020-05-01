@@ -50,10 +50,9 @@ class Alerts(commands.Cog):
     # We can track the timers and windows in DDB, perhaps.
     @commands.command(
         aliases=['azuregos', 'az'],
-        usage=f'azu <status> <whisper targets> :: !azu up manbearpig saitama',
-        enabled=False,
     )
     async def azu(self, ctx, status, *names):
+        """azu <status> <whisper targets> :: !azu up manbearpig saitama"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Azuregos is {status}!')
@@ -61,57 +60,20 @@ class Alerts(commands.Cog):
 
     @commands.command(
         aliases=['kazzak', 'kaz'],
-        usage=f'kazz <status> <whisper targets> :: !kazz up manbearpig saitama',
-        enabled=False,
     )
     async def kazz(self, ctx, status, *names):
+        """!kazz <status> <whisper targets> :: !kazz up manbearpig saitama"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Kazzak is {status}!')
         await self.action(ctx, status)
 
-    @commands.command(
-        aliases=['emeriss'],
-        usage=f'emer <status> <whisper targets> :: !emer up manbearpig saitama',
-        enabled=False,
-    )
-    async def emer(self, ctx, status, *names):
+    @commands.command()
+    async def greenies(self, ctx, status):
+        """!greenies <status> <whisper targets> :: !greenies up manbearpig saitama"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
-        self.log.info(f'Emeriss is {status}!')
-        await self.action(ctx, status)
-
-    @commands.command(
-        aliases=['lethon'],
-        usage=f'leth <status> <whisper targets> :: !leth up manbearpig saitama',
-        enabled=False,
-    )
-    async def leth(self, ctx, status, *names):
-        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        status = status.lower()
-        self.log.info(f'Lethon is {status}!')
-        await self.action(ctx, status)
-
-    @commands.command(
-        aliases=['taerar'],
-        usage=f'taer <status> <whisper targets> :: !taer up manbearpig saitama',
-        enabled=False,
-    )
-    async def taer(self, ctx, status, *names):
-        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        status = status.lower()
-        self.log.info(f'Taerar is {status}!')
-        await self.action(ctx, status)
-
-    @commands.command(
-        aliases=['ysondre'],
-        usage=f'yson <status> <whisper targets> :: !yson up manbearpig saitama',
-        enabled=False,
-    )
-    async def yson(self, ctx, status, *names):
-        self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        status = status.lower()
-        self.log.info(f'Ysondre is {status}!')
+        self.log.info(f'Green dragons are {status}!')
         await self.action(ctx, status)
 
     @commands.command()
@@ -119,13 +81,14 @@ class Alerts(commands.Cog):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.author.nick or ctx.author.name} says a boss is up!')
         if not self.bot.wakeup:
-            msg = f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}wakeup.'
+            msg = f'The wakeup channel is not set. Please set it with {self.bot.command_prefix}voice-channel.'
             await ctx.send(msg)
             raise commands.CommandError(msg)
         await self._start_alarm(ctx)
 
     @commands.command()
     async def whisper(self, ctx, *names):
+        """whisper <names> :: !whisper saitama manbearpig"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.author.nick} says to whisper {", ".join(names)} for invites.')
         channel = discord.utils.get(ctx.guild.channels, name=self.bot.announcements)

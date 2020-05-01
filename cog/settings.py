@@ -25,6 +25,7 @@ class Settings(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def alarm(self, ctx, link: str):
+        """Sets the alarm sound :: !alarm <YouTube link>"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         msg = f'Current alarm is: {self.bot.yt_title}. Changing to: {link}.'
         await ctx.send(msg)
@@ -36,6 +37,7 @@ class Settings(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def watch(self, ctx, *name: str):
+        """Changes which channel BossButler will watch for keywords"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         ch = await valid_channel(ctx, name)
         msg = f'Setting watch channel to: {ch}.'
@@ -43,10 +45,11 @@ class Settings(commands.Cog):
         self.log.info(msg)
         self.bot.watch = ch
 
-    @commands.command(aliases=['wakeup-channel'])
+    @commands.command(name='voice-channel', aliases=['voice-channel'])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def wakeup(self, ctx, *name):
+    async def voice_channel(self, ctx, *name):
+        """Changes the channel that BossButler will enter automatically and play the alert"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         ch = await valid_channel(ctx, name)
         msg = f'Setting wakeup channel to: {ch}.'
@@ -56,8 +59,8 @@ class Settings(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def prefix(self, ctx, char: str):
+        """Changes the command prefix for BossButler"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         if len(char) > 1:
             await ctx.send(f'Prefixes can only be one character.')
@@ -68,9 +71,9 @@ class Settings(commands.Cog):
             self.log.info(msg)
             self.bot.command_prefix = char
 
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def announcements(self, ctx, *name):
+    @commands.command(name='announce-channel', aliases=['annoucements'])
+    async def text_announcements(self, ctx, *name):
+        """Changes which channel BossButler will use to post announcements"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         ch = await valid_channel(ctx, name)
         await ctx.send(f'Setting the channel for announcements to {ch}.')

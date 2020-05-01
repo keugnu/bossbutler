@@ -12,6 +12,7 @@ class Control(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def stop(self, ctx):
+        """Stop playing the alarm and leave the voice channel"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         if ctx.voice_client:
             msg = f'Leaving {ctx.voice_client.channel}.'
@@ -25,6 +26,7 @@ class Control(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def play(self, ctx):
+        """Immediately play the currently configured alarm"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         if not ctx.voice_client:
             await ctx.send(f'I am not even in a voice channel right now... You will have to send me somewhere first.')
@@ -39,6 +41,7 @@ class Control(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def join(self, ctx, channel: str):
+        """Immediately join a voice channel, leaving any other"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.message.author} asked me to move to {channel}.')
         await ctx.send(f'Joining {self.bot.wakeup}.')
