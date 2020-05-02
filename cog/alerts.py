@@ -1,21 +1,19 @@
 import logging
 
 import discord
+import pytz
+
 from discord.ext import commands
 
 
 class Alerts(commands.Cog):
 
-    UP_STATUSES = ['up', 'spawned']
+    UP_STATUSES = ['up', 'spawn', 'spawned']
     DOWN_STATUES = ['down', 'dead']
 
     def __init__(self, bot):
         self.bot = bot
         self.log = logging.getLogger('bossbutler.cog.alerts')
-
-    def validate_status(self, status):
-        if status:
-            assert status in Alerts.UP_STATUSES or status in Alerts.DOWN_STATUES
 
     async def _start_alarm(self, ctx):
         if not self.bot.wakeup:
@@ -34,20 +32,25 @@ class Alerts(commands.Cog):
         await ctx.send(f'Stopping the alarms now!')
         await self.bot.get_command('stop').invoke(ctx)
 
-    async def action(self, ctx, status):
-        try:
-            self.validate_status(status)
-        except AssertionError:
-            msg = f'{status} is an invalid option. You must use one of: {", ".join(Alerts.STATUSES)}'
-            await ctx.send(msg)
-            raise commands.CommandError(msg)
+    async def action(self, ctx, boss, status):
+        time = ctx.message.created_at.astimezone(pytz.utc).timestamp()
         if status in Alerts.UP_STATUSES:
+            try:
+                self.bot.update_spawn(self.bot, boss, 'up', time)
+            except RuntimeWarning:
+                await ctx.send(
+                    'It has been less than 5 minutes since the last time this boss was reported up.'
+                    f'I think there has been a mistake. If not, use {self.bot.command_prefix}up instead.'
+                )
             await self._start_alarm(ctx)
         elif status in Alerts.DOWN_STATUES:
+            self.bot.update_spawn(self.bot, boss, 'down', time)
             await self._stop_alarm(ctx)
+        else:
+            msg = f'{status} is an invalid option. You must use one of: {", ".join([Alerts.UP_STATUSES, Alerts.DOWN_STATUES])}'
+            await ctx.send(msg)
+            raise commands.CommandError(msg)
 
-    # The boss-specific commands are meant for tracking timers and windows. This functionality is not yet in place.
-    # We can track the timers and windows in DDB, perhaps.
     @commands.command(
         aliases=['azuregos', 'az'],
     )
@@ -56,7 +59,7 @@ class Alerts(commands.Cog):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Azuregos is {status}!')
-        await self.action(ctx, status)
+        await self.action(ctx, 'azu', status)
 
     @commands.command(
         aliases=['kazzak', 'kaz'],
@@ -66,7 +69,7 @@ class Alerts(commands.Cog):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Kazzak is {status}!')
-        await self.action(ctx, status)
+        await self.action(ctx, 'kazz', status)
 
     @commands.command()
     async def greenies(self, ctx, status):
@@ -74,7 +77,7 @@ class Alerts(commands.Cog):
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Green dragons are {status}!')
-        await self.action(ctx, status)
+        await self.action(ctx, 'green', status)
 
     @commands.command()
     async def up(self, ctx):

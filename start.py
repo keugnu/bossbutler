@@ -28,7 +28,7 @@ async def on_ready():
     log.info(f'I have connected to {", ".join([g.name for g in guilds])}')
     try:
         # in case the bot disconnected inadvertently, make sure the file still exists
-        with open(bot.yt_file) as f:
+        with open(bot.yt_file):
             pass
     except (OSError, TypeError):
         if not bot.yt_url:
@@ -37,6 +37,9 @@ async def on_ready():
             log.error(f'Could not find {bot.yt_file}. Redownloading it.')
 
         bot.yt_url, bot.yt_tile, bot.yt_file = utils.download_yt(bot.yt_url)
+        bot.init_spawn_data(bot)
+        bot.start_tasks(bot)
+
 
 try:
     bot.add_cogs(bot)
