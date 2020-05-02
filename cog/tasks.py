@@ -67,13 +67,13 @@ class Tasks(commands.Cog):
     async def death_integrity(self):
         # WARNING - THIS TASK DOES NOT WORK FOR MULTIPLE REALMS
         self.log.debug('Running death_integrity.')
-        msg = '@Leadership Death information is missing for {boss}'
+        msg = 'Death information is missing for {boss}'
         with open(self.bot.spawn_data_file, 'rb') as f:
             raw_data = marshal.load(f)
 
         for boss in raw_data.keys():
             if raw_data[boss].get('up') and len(raw_data[boss].get('up')) >= len(raw_data[boss].get('down')):
-                self.log.warning(f'{boss} death data might be missing!')
+                self.log.warning(f'{boss} death data might be missing!') 
                 self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
                 for guild_id in self.bot.settings.keys():
                     guild = await self.bot.fetch_guild(guild_id)
@@ -82,7 +82,7 @@ class Tasks(commands.Cog):
                         ch = discord.utils.get(
                             self.bot.get_all_channels(),
                             guild_name='World Boss',
-                            name=self.bot.settings[guild_id].get('announcements')
+                            name='bot-commands',
                         )
                         await ch.send(msg.format(boss=boss))
         self.log.debug('Finished death_integrity.')
