@@ -91,7 +91,7 @@ class Alerts(commands.Cog):
 
     @commands.command()
     async def whisper(self, ctx, *names):
-        """whisper <names> :: !whisper saitama manbearpig"""
+        """Sends an annoucement to whisper <names> :: !whisper saitama manbearpig"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.author.nick} says to whisper {", ".join(names)} for invites.')
         channel = discord.utils.get(ctx.guild.channels, name=self.bot.announcements)

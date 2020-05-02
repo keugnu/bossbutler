@@ -45,7 +45,7 @@ class Settings(commands.Cog):
         self.log.info(msg)
         self.bot.watch = ch
 
-    @commands.command(name='voice-channel', aliases=['voice-channel'])
+    @commands.command(name='voice-channel', aliases=['vc'])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def voice_channel(self, ctx, *name):
@@ -71,7 +71,7 @@ class Settings(commands.Cog):
             self.log.info(msg)
             self.bot.command_prefix = char
 
-    @commands.command(name='announce-channel', aliases=['annoucements'])
+    @commands.command(name='announce-channel', aliases=['ac'])
     async def text_announcements(self, ctx, *name):
         """Changes which channel BossButler will use to post announcements"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
