@@ -53,6 +53,7 @@ class Bot(commands.Bot):
 
     @staticmethod
     async def bootstrap_settings(bot):
+        bot.settings_file = os.path.join(os.path.dirname(__file__), 'settings.bin')
         if not os.path.exists(bot.settings_file):
             with open(bot.settings_file, 'wb') as f:
                 marshal.dump({}, f)
