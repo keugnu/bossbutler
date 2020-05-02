@@ -47,7 +47,6 @@ class Settings(commands.Cog):
 
     @commands.command(name='voice-channel', aliases=['vc'])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def voice_channel(self, ctx, *name):
         """Changes the channel that BossButler will enter automatically and play the alert"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
