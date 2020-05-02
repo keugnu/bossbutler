@@ -32,17 +32,13 @@ class Alerts(commands.Cog):
         await ctx.send(f'Stopping the alarms now!')
         await self.bot.get_command('stop').invoke(ctx)
 
-    async def action(self, ctx, boss, status):
+    async def action(self, ctx, boss, status, names):
         time = ctx.message.created_at.astimezone(pytz.utc).timestamp()
         if status in Alerts.UP_STATUSES:
-            try:
-                self.bot.update_spawn(self.bot, boss, 'up', time)
-            except RuntimeWarning:
-                await ctx.send(
-                    'It has been less than 5 minutes since the last time this boss was reported up.'
-                    f'I think there has been a mistake. If not, use {self.bot.command_prefix}up instead.'
-                )
+            self.bot.update_spawn(self.bot, boss, 'up', time)
             await self._start_alarm(ctx)
+            if names:
+                await self.whisper(ctx, *names)
         elif status in Alerts.DOWN_STATUES:
             self.bot.update_spawn(self.bot, boss, 'down', time)
             await self._stop_alarm(ctx)
