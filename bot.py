@@ -11,14 +11,10 @@ class Bot(commands.Bot):
     def __init__(self, pfx):
         super().__init__(command_prefix=pfx)
 
-        self.yt_url = None
-        self.yt_title = None
-        self.yt_file = None
+        self.settings = None
         self.ffmpeg = shutil.which('ffmpeg')
-        self.wakeup = None
-        self.announcements = None
+        self.settings_file = utils.find(os.path.dirname(__file__), 'settings.bin')
         self.spawn_data_file = utils.find(os.path.dirname(__file__), 'spawn_data.bin')
-        self.leadership_channel = None
 
         assert os.path.exists(self.ffmpeg)
 
@@ -54,6 +50,42 @@ class Bot(commands.Bot):
                     }
                 }
                 marshal.dump(default_data, f)
+
+    @staticmethod
+    async def bootstrap_settings(bot):
+        if not os.path.exists(bot.settings_file):
+            with open(bot.settings_file, 'wb') as f:
+                marshal.dump({}, f)
+
+        with open(bot.settings_file, 'rb') as f:
+            settings = marshal.load(f)
+
+        async for guild in bot.fetch_guilds():
+            if not settings.get(guild.id):
+                settings.update({guild.id: {}})
+            settings = bot.check_yt(guild.id, settings)
+
+        with open(bot.settings_file, 'wb') as f:
+            marshal.dump(settings, f)
+
+        bot.settings = settings
+
+    @staticmethod
+    def check_yt(id, settings):
+        try:
+            with open(settings.get(id).get('yt_file')):
+                pass
+        except (FileNotFoundError, TypeError):
+            url, title, path = utils.download_yt()
+            settings[id].update(
+                {
+                    'yt_url': url,
+                    'yt_title': title,
+                    'yt_file': path
+                }
+            )
+
+        return settings
 
     @staticmethod
     def update_spawn(bot, boss, status, time):

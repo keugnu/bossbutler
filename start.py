@@ -18,27 +18,22 @@ bot = Bot(pfx='!')
 
 @bot.event
 async def on_disconnect():
-    log.warning('Removing last video file before disconnecting.')
-    os.remove(bot.yt_file)
+    log.warning('Removing last video files before disconnecting.')
+    async for guild in bot.fetch_guilds():
+        path = bot.settings.get(guild.id).get('yt_file')
+        os.remove(path)
+        log.warning(f'Removed {path}')
+    log.warning('Commiting current bot settings.')
+    await bot.get_cog('Tasks').commit_settings()
 
 
 @bot.event
 async def on_ready():
     guilds = await bot.fetch_guilds().flatten()
     log.info(f'I have connected to {", ".join([g.name for g in guilds])}')
-    try:
-        # in case the bot disconnected inadvertently, make sure the file still exists
-        with open(bot.yt_file):
-            pass
-    except (OSError, TypeError):
-        if not bot.yt_url:
-            log.info('Setting the alarm for the first time.')
-        else:
-            log.error(f'Could not find {bot.yt_file}. Redownloading it.')
-
-        bot.yt_url, bot.yt_tile, bot.yt_file = utils.download_yt(bot.yt_url)
-        bot.init_spawn_data(bot)
-        bot.start_tasks(bot)
+    await bot.bootstrap_settings(bot)
+    bot.init_spawn_data(bot)
+    bot.start_tasks(bot)
 
 
 try:

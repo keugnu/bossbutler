@@ -26,12 +26,13 @@ class Tasks(commands.Cog):
         self.was_reset_today = False
         self.tuesday_reset.start()
         self.death_integrity.start()
+        self.commit_settings.start()
 
     @tasks.loop(minutes=60)
     async def tuesday_reset(self):
         """Overwrite last death to Tuesday 8AM PST"""
         self.log = logging.getLogger('bossbutler.tasks')
-        self.log.info('Running Tuesday reset task...')
+        self.log.debug('Running tuesday_reset.')
         self.lock = asyncio.Lock()
         today = datetime.datetime.today().astimezone(pytz.utc)
         self.log.debug(today)
@@ -54,20 +55,41 @@ class Tasks(commands.Cog):
                     marshal.dump(raw_data, f)
         else:
             self.log.info(f'Not time for a reset. Today is {DAY_MAP[today.weekday()]}.')
-        self.log.info('Finished Tuesday reset task.')
+        self.log.debug('Finished tuesday_reset.')
 
     @tasks.loop(minutes=20)
     async def death_integrity(self):
-        msg = '@here Death information is missing for {boss}'
+        # WARNING - THIS TASK DOES NOT WORK FOR MULTIPLE REALMS
+        self.log.debug('Running death_integrity.')
+        msg = '@Leadership Death information is missing for {boss}'
         with open(self.bot.spawn_data_file, 'rb') as f:
             raw_data = marshal.load(f)
 
         for boss in raw_data.keys():
-            if boss.get('up') and len(boss.get('up')) >= len(boss.get('down')):
-                # TODO: Change somehow so that the bot can be active in multiple servers
-                ch = discord.utils.get(
-                    self.bot.get_all_channels(),
-                    guild_name='World Boss',
-                    name=self.bot.leadership_channel if self.bot.leadership_channel else self.bot.announcements
-                )
-                await ch.send(msg.format(boss=boss))
+            if raw_data[boss].get('up') and len(raw_data[boss].get('up')) >= len(raw_data[boss].get('down')):
+                self.log.warning(f'{boss} death data might be missing!')
+                self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
+                for guild_id in self.bot.settings.keys():
+                    guild = await self.bot.fetch_guild(guild_id)
+                    if guild.name == 'World Boss':
+                        self.log.info(f'Pinging the anncouncement channel in {guild.name}')
+                        ch = discord.utils.get(
+                            self.bot.get_all_channels(),
+                            guild_name='World Boss',
+                            name=self.bot.settings[guild_id].get('announcements')
+                        )
+                        await ch.send(msg.format(boss=boss))
+        self.log.debug('Finished death_integrity.')
+
+    @tasks.loop(minutes=2)
+    async def commit_settings(self):
+        self.log.debug('Running commit_settings.')
+        try:
+            with open(self.bot.settings_file, 'wb') as f:
+                marshal.dump(self.bot.settings, f)
+        except (FileNotFoundError, TypeError):
+            self.log.error('Settings file does not exist')
+        except OSError as e:
+            self.log.error(f'Looks like {self.bot.settings_file} is inaccessible right now: {e}')
+
+        self.log.debug('Finished commit_settings.')
