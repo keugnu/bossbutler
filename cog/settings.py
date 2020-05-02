@@ -23,7 +23,7 @@ class Settings(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.cooldown(rate=1, per=120)
     async def alarm(self, ctx, link: str):
         """Sets the alarm sound :: !alarm <YouTube link>"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
@@ -32,7 +32,6 @@ class Settings(commands.Cog):
         self.log.info(msg)
         await self._change_alarm(ctx, link)
 
-    # this could be used if we want the bot to just watch a channel for keywords
     @commands.command(enabled=False)
     @commands.guild_only()
     async def watch(self, ctx, *name: str):

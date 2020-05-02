@@ -54,33 +54,37 @@ class Alerts(commands.Cog):
     @commands.command(
         aliases=['azuregos', 'az'],
     )
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
     async def azu(self, ctx, status, *names):
-        """azu <status> <whisper targets> :: !azu up manbearpig saitama"""
+        """!azu <up|down> <whisper targets> (space delimited)"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Azuregos is {status}!')
-        await self.action(ctx, 'azu', status)
+        await self.action(ctx, 'azu', status, names)
 
     @commands.command(
         aliases=['kazzak', 'kaz'],
     )
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
     async def kazz(self, ctx, status, *names):
-        """!kazz <status> <whisper targets> :: !kazz up manbearpig saitama"""
+        """!kazz <up|down> <whisper targets> (space delimited)"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Kazzak is {status}!')
-        await self.action(ctx, 'kazz', status)
+        await self.action(ctx, 'kazz', status, names)
 
     @commands.command()
-    async def greenies(self, ctx, status):
-        """!greenies <status> <whisper targets> :: !greenies up manbearpig saitama"""
+    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
+    async def green(self, ctx, status):
+        """!green <up|down> <whisper targets> (space delimited)"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
         self.log.info(f'Green dragons are {status}!')
-        await self.action(ctx, 'green', status)
+        await self.action(ctx, 'green', status, names)
 
     @commands.command()
     async def up(self, ctx):
+        """DO NOT USE UNLESS OTHER COMMANDS ARE NOT WORKING. Will trigger an alarm immediately."""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.author.nick or ctx.author.name} says a boss is up!')
         if not self.bot.settings[ctx.guild.id].get('wakeup'):
@@ -91,7 +95,7 @@ class Alerts(commands.Cog):
 
     @commands.command()
     async def whisper(self, ctx, *names):
-        """Sends an annoucement to whisper <names> :: !whisper saitama manbearpig"""
+        """Sends an annoucement to whisper <names> (space delimited)"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.author.nick} says to whisper {", ".join(names)} for invites.')
         channel = discord.utils.get(ctx.guild.channels, name=self.bot.settings[ctx.guild.id].get('announcements'))
