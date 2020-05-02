@@ -19,12 +19,11 @@ bot = Bot(pfx='!')
 @bot.event
 async def on_disconnect():
     log.warning('Removing last video files before disconnecting.')
-    async for guild in bot.fetch_guilds():
+    for guild in bot.guilds:
         path = bot.settings.get(guild.id).get('yt_file')
-        os.remove(path)
-        log.warning(f'Removed {path}')
-    log.warning('Commiting current bot settings.')
-    await bot.get_cog('Tasks').commit_settings()
+        if os.path.exists(path):
+            os.remove(path)
+            log.warning(f'Removed {path}')
 
 
 @bot.event

@@ -28,6 +28,12 @@ class Tasks(commands.Cog):
         self.death_integrity.start()
         self.commit_settings.start()
 
+    def cog_unload(self):
+        self.log.warning('Stopping all tasks before quitting.')
+        self.tuesday_reset.cancel()
+        self.death_integrity.cancel()
+        self.commit_settings.cancel()
+
     @tasks.loop(minutes=60)
     async def tuesday_reset(self):
         """Overwrite last death to Tuesday 8AM PST"""
