@@ -131,3 +131,5 @@ dmypy.json
 .pyre/
 
 videos/
+settings.bin
+spawn_data.bin
