@@ -87,7 +87,7 @@ class Tasks(commands.Cog):
                         await ch.send(msg.format(boss=boss))
         self.log.debug('Finished death_integrity.')
 
-    @tasks.loop(minutes=2)
+    @tasks.loop(minutes=10)
     async def commit_settings(self):
         self.log.debug('Running commit_settings.')
         try:
