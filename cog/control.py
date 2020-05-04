@@ -24,7 +24,6 @@ class Control(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def play(self, ctx):
         """Immediately play the currently configured alarm"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
