@@ -71,7 +71,7 @@ class Alerts(commands.Cog):
 
     @commands.command()
     @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
-    async def green(self, ctx, status):
+    async def green(self, ctx, status, *names):
         """!green <up|down> <whisper targets> (space delimited)"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         status = status.lower()
