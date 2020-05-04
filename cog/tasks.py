@@ -72,7 +72,7 @@ class Tasks(commands.Cog):
             raw_data = marshal.load(f)
 
         for boss in raw_data.keys():
-            if raw_data[boss].get('up') and len(raw_data[boss].get('up')) >= len(raw_data[boss].get('down')):
+            if raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')):
                 self.log.warning(f'{boss} death data might be missing!') 
                 self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
                 for guild_id in self.bot.settings.keys():
