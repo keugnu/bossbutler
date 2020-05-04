@@ -35,7 +35,7 @@ class Control(commands.Cog):
         msg = f'Playing the alarm now.'
         await ctx.send(msg)
         self.log.info(msg)
-        ctx.voice_client.play(discord.FFmpegPCMAudio(self.bot.settings.get('yt_file'), executable=self.bot.ffmpeg))
+        ctx.voice_client.play(discord.FFmpegPCMAudio(self.bot.settings[ctx.guild.id].get('yt_file'), executable=self.bot.ffmpeg))
 
     @commands.command()
     @commands.guild_only()
