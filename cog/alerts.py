@@ -1,7 +1,9 @@
+import datetime
 import logging
 
 import discord
 import pytz
+from pytz import timezone
 
 from discord.ext import commands
 
@@ -29,7 +31,6 @@ class Alerts(commands.Cog):
         vc.play(discord.FFmpegPCMAudio(self.bot.settings[ctx.guild.id].get('yt_file'), executable=self.bot.ffmpeg))
 
     async def _stop_alarm(self, ctx):
-        await ctx.send(f'Stopping the alarms now!')
         await self.bot.get_command('stop').invoke(ctx)
 
     async def action(self, ctx, boss, status, names):
@@ -40,6 +41,8 @@ class Alerts(commands.Cog):
             if names:
                 await self.whisper(ctx, *names)
         elif status in Alerts.DOWN_STATUES:
+            next_spawn = ctx.message.created_at.astimezone(timezone('US/Eastern')) + datetime.timedelta(days=3)
+            await ctx.send(f'Recording the death. The next window will open at approximately {next_spawn.strftime("%b. %d %H:%M %z")}')
             self.bot.update_spawn(self.bot, boss, 'down', time)
             await self._stop_alarm(ctx)
         else:
