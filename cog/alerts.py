@@ -42,7 +42,7 @@ class Alerts(commands.Cog):
                 await self.whisper(ctx, *names)
         elif status in Alerts.DOWN_STATUES:
             next_spawn = ctx.message.created_at.astimezone(timezone('US/Eastern')) + datetime.timedelta(days=3)
-            await ctx.send(f'Recording the death. The next window will open at approximately {next_spawn.strftime("%b %d %H:%M (%z)")}')
+            await ctx.send(f'Recording the death. The next {boss} window will open at approximately {next_spawn.strftime("%b %d %H:%M (%z)")}')
             self.bot.update_spawn(self.bot, boss, 'down', time)
             await self._stop_alarm(ctx)
         else:
