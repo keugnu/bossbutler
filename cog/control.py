@@ -33,7 +33,7 @@ class Control(commands.Cog):
             raise commands.CommandError('Cannot play when not in a channel.')
 
         msg = f'Playing the alarm now.'
-        ctx.send(msg)
+        await ctx.send(msg)
         self.log.info(msg)
         ctx.voice_client.play(discord.FFmpegPCMAudio(self.bot.settings.get('yt_file'), executable=self.bot.ffmpeg))
 
