@@ -44,7 +44,7 @@ class Control(commands.Cog):
         """Immediately join a voice channel, leaving any other"""
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
         self.log.info(f'{ctx.message.author} asked me to move to {channel}.')
-        await ctx.send(f'Joining {self.bot.wakeup}.')
+        await ctx.send(f'Joining {self.bot.settings[ctx.guild.id].get("wakeup")}.')
         if ctx.voice_client:
             self.log.warn(f'I am already connected to {ctx.voice_client.channel}, but I will move anyways.')
             await ctx.voice_client.disconnect()
