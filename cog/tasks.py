@@ -103,7 +103,9 @@ class Tasks(commands.Cog):
         try:
             with open(self.bot.spawn_data_file, 'rb') as f:
                 raw_data = marshal.load(f)
-
+        except (FileNotFoundError, TypeError):
+            self.log.error(f'Spawn data file does not exist at {self.bot.spawn_data_file}')
+        else:
             windows = []
             for boss, statuses in raw_data.items():
                 if statuses.get('down') and not len(statuses.get('up')) > len(statuses.get('down')):
@@ -121,9 +123,6 @@ class Tasks(commands.Cog):
                         lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
                         self.bot.get_all_channels()
                     )
-                    await ch.send(msg.format(boss=boss))
-
-        except (FileNotFoundError, TypeError):
-            self.log.error('Spawn data file does not exist')
+                    await ch.send(msg)
 
         self.log.debug('Finished check_windows')
