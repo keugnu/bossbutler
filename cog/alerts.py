@@ -34,15 +34,15 @@ class Alerts(commands.Cog):
         await self.bot.get_command('stop').invoke(ctx)
 
     async def action(self, ctx, boss, status, names):
-        time = ctx.message.created_at.astimezone(pytz.utc).timestamp()
+        time = ctx.message.created_at.timestamp()
         if status in Alerts.UP_STATUSES:
             self.bot.update_spawn(self.bot, boss, 'up', time)
             await self._start_alarm(ctx)
             if names:
                 await self.whisper(ctx, *names)
         elif status in Alerts.DOWN_STATUES:
-            next_spawn = ctx.message.created_at.astimezone(timezone('US/Eastern')) + datetime.timedelta(days=3)
-            await ctx.send(f'Recording the death. The next {boss} window will open at approximately {next_spawn.strftime("%b %d %H:%M (%z)")}')
+            next_spawn = self.bot._calculate_window(time)
+            await ctx.send(f'Recording the death. The next {boss} window will open at approximately {next_spawn.strftime("%b %d %H:%M %Z")}')
             self.bot.update_spawn(self.bot, boss, 'down', time)
             await self._stop_alarm(ctx)
         else:

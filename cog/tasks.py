@@ -27,12 +27,14 @@ class Tasks(commands.Cog):
         self.tuesday_reset.start()
         self.death_integrity.start()
         self.commit_settings.start()
+        self.check_windows.start()
 
     def cog_unload(self):
         self.log.warning('Stopping all tasks before quitting.')
         self.tuesday_reset.cancel()
         self.death_integrity.cancel()
         self.commit_settings.cancel()
+        self.check_windows.cancel()
 
     @tasks.loop(minutes=60)
     async def tuesday_reset(self):
@@ -50,7 +52,7 @@ class Tasks(commands.Cog):
             async with self.lock:
                 with open(self.bot.spawn_data_file, 'rb') as f:
                     raw_data = marshal.load(f)
-                
+
                 for boss, _ in raw_data.items():
                     row = raw_data[boss]['down'][:-1] if raw_data[boss]['down'] else []
                     row.append(reset_datetime.timestamp())
@@ -73,18 +75,13 @@ class Tasks(commands.Cog):
 
         for boss in raw_data.keys():
             if raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')):
-                self.log.warning(f'{boss} death data might be missing!') 
+                self.log.warning(f'{boss} death data might be missing!')
                 self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
-                for guild_id in self.bot.settings.keys():
-                    guild = await self.bot.fetch_guild(guild_id)
-                    if guild.name == 'World Boss':
-                        self.log.info(f'Pinging the anncouncement channel in {guild.name}')
-                        ch = discord.utils.get(
-                            self.bot.get_all_channels(),
-                            guild_name='World Boss',
-                            name='bot-commands',
-                        )
-                        await ch.send(msg.format(boss=boss))
+                ch = discord.utils.find(
+                    lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
+                    self.bot.get_all_channels()
+                )
+                await ch.send(msg.format(boss=boss))
         self.log.debug('Finished death_integrity.')
 
     @tasks.loop(minutes=10)
@@ -99,3 +96,34 @@ class Tasks(commands.Cog):
             self.log.error(f'Looks like {self.bot.settings_file} is inaccessible right now: {e}')
 
         self.log.debug('Finished commit_settings.')
+
+    @tasks.loop(hours=2)
+    async def check_windows(self):
+        self.log.debug('Running check_windows')
+        try:
+            with open(self.bot.spawn_data_file, 'rb') as f:
+                raw_data = marshal.load(f)
+
+            windows = []
+            for boss, statuses in raw_data.items():
+                if statuses.get('down') and not len(statuses.get('up')) > len(statuses.get('down')):
+                    windows.append((boss, self.bot._calculate_window(statuses.get('down')[-1])))
+
+            self.log.info(f'Next windows are {" | ".join("{} {}".format(k, v) for k, v in windows)}')
+            now = datetime.datetime.now(pytz.timezone('US/Eastern'))
+
+            for boss, window in windows:
+                if window.timestamp() < now.timestamp() + 3600 * 2:
+                    self.log.info(f'{window} opens soon. now: {now}')
+                    remaining = window.timestamp() - now
+                    msg = f'The window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
+                    ch = discord.utils.find(
+                        lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
+                        self.bot.get_all_channels()
+                    )
+                    await ch.send(msg.format(boss=boss))
+
+        except (FileNotFoundError, TypeError):
+            self.log.error('Settings file does not exist')
+
+        self.log.debug('Finished check_windows')

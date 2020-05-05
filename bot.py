@@ -1,11 +1,14 @@
+import datetime
 import os
 import marshal
 import shutil
 
+import pytz
 from discord.ext import commands
 
 import utils
 from cog import alerts, settings, control, tasks
+
 
 class Bot(commands.Bot):
     def __init__(self, pfx):
@@ -94,10 +97,25 @@ class Bot(commands.Bot):
             raw_data = marshal.load(f)
 
         row = raw_data[boss][status]
-        if row and time < row[-1] + 300:
-            # it has been less than 5m since the last recorded time... This should probbaly not be recorded
-            raise RuntimeWarning
         row.append(time)
         raw_data[boss].update({status: row})
         with open(bot.spawn_data_file, 'wb') as f:
             marshal.dump(raw_data, f)
+
+    @staticmethod
+    def _calculate_window(time):
+        last_death = datetime.datetime.fromtimestamp(time).replace(tzinfo=pytz.utc)
+        tues_reset = datetime.datetime(last_death.year, last_death.month, last_death.day, hour=15, tzinfo=pytz.utc)
+
+        while True:  # disgusting do-while in python
+            if tues_reset.weekday != 1 and tues_reset.hour > 15:
+                tues_reset += datetime.timedelta(1)
+                continue
+            break
+
+        if last_death + datetime.timedelta(days=3, hours=12) < tues_reset:
+            window = last_death + datetime.timedelta(days=3, hours=12)
+        else:
+            window = tues_reset + datetime.timedelta(hours=12)
+
+        return window.astimezone(pytz.timezone('US/Eastern'))
