@@ -89,7 +89,7 @@ class Tasks(commands.Cog):
         self.log.debug('Running commit_settings.')
         try:
             with open(self.bot.settings_file, 'wb') as f:
-                marshal.dump(self.bot.settings, f)
+                marshal.dump(self.bot.settings_file, f)
         except (FileNotFoundError, TypeError):
             self.log.error('Settings file does not exist')
         except OSError as e:
@@ -124,6 +124,6 @@ class Tasks(commands.Cog):
                     await ch.send(msg.format(boss=boss))
 
         except (FileNotFoundError, TypeError):
-            self.log.error('Settings file does not exist')
+            self.log.error('Spawn data file does not exist')
 
         self.log.debug('Finished check_windows')
