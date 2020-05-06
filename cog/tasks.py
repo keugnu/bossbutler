@@ -89,7 +89,7 @@ class Tasks(commands.Cog):
         self.log.debug('Running commit_settings.')
         try:
             with open(self.bot.settings_file, 'wb') as f:
-                marshal.dump(self.bot.settings_file, f)
+                marshal.dump(self.bot.settings, f)
         except (FileNotFoundError, TypeError):
             self.log.error('Settings file does not exist')
         except OSError as e:
