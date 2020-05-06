@@ -118,7 +118,10 @@ class Tasks(commands.Cog):
                 if window.timestamp() < now.timestamp() + 3600 * 2:
                     self.log.info(f'{window} opens soon. now: {now}')
                     remaining = window.timestamp() - now.timestamp()
-                    msg = f'The window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
+                    if remaining > 0:
+                        msg = f'The window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
+                    else:
+                        msg = f'The window for {boss.upper()} is open NOW!'
                     ch = discord.utils.find(
                         lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
                         self.bot.get_all_channels()
