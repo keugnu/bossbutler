@@ -105,17 +105,15 @@ class Bot(commands.Bot):
     @staticmethod
     def _calculate_window(time):
         last_death = datetime.datetime.fromtimestamp(time).replace(tzinfo=pytz.utc)
-        tues_reset = datetime.datetime(last_death.year, last_death.month, last_death.day, hour=15, tzinfo=pytz.utc)
+        tues_reset = datetime.datetime(last_death.year, last_death.month, last_death.day, hour=14, tzinfo=pytz.utc)
 
-        while True:  # disgusting do-while in python
-            if tues_reset.weekday != 1 and tues_reset.hour > 15:
-                tues_reset += datetime.timedelta(1)
-                continue
-            break
+        while tues_reset.weekday() != 1:
+            tues_reset += datetime.timedelta(1)
 
         if last_death + datetime.timedelta(days=3, hours=12) < tues_reset:
             window = last_death + datetime.timedelta(days=3, hours=12)
         else:
-            window = tues_reset + datetime.timedelta(hours=12)
+            dst = bool(pytz.timezone('US/Eastern').localize(datetime.datetime.now()).dst())
+            window = tues_reset + datetime.timedelta(hours=12 + dst)
 
-        return window.astimezone(pytz.timezone('US/Eastern'))
+        return window
