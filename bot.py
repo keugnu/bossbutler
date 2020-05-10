@@ -116,4 +116,4 @@ class Bot(commands.Bot):
             dst = bool(pytz.timezone('US/Eastern').localize(datetime.datetime.now()).dst())
             window = tues_reset + datetime.timedelta(hours=12 + dst)
 
-        return window.astmezone(pytz.timezone('US/Eastern'))
+        return window.astimezone(pytz.timezone('US/Eastern'))
