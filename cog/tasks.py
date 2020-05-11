@@ -74,9 +74,13 @@ class Tasks(commands.Cog):
             raw_data = marshal.load(f)
 
         for boss in raw_data.keys():
-            if raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')):
+            if (
+                    raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')) or
+                    raw_data[boss].get('up2') and len(raw_data[boss].get('up2')) > len(raw_data[boss].get('down2'))
+            ):
                 self.log.warning(f'{boss} death data might be missing!')
                 self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
+                self.log.debug(f'up2: {raw_data[boss].get("up2")}   down2: {raw_data[boss].get("down2")}')
                 ch = discord.utils.find(
                     lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
                     self.bot.get_all_channels()
@@ -110,6 +114,8 @@ class Tasks(commands.Cog):
             for boss, statuses in raw_data.items():
                 if statuses.get('down') and not len(statuses.get('up')) > len(statuses.get('down')):
                     windows.append((boss, self.bot._calculate_window(statuses.get('down')[-1])))
+                if statuses.get('down2') and not len(statuses.get('up2')) > len(statuses.get('down2')):
+                    windows.append((boss, self.bot._calculate_window(statuses.get('down2')[-1])))
 
             self.log.info(f'Next windows are {" | ".join("{} {}".format(k, v) for k, v in windows)}')
             now = datetime.datetime.now(pytz.timezone('US/Eastern'))
@@ -119,9 +125,9 @@ class Tasks(commands.Cog):
                     self.log.info(f'{window} opens soon. now: {now}')
                     remaining = window.timestamp() - now.timestamp()
                     if remaining > 0:
-                        msg = f'The window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
+                        msg = f'A window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
                     elif remaining <= -3600 * 2:
-                        msg = f'The window for {boss.upper()} is open NOW!'
+                        msg = f'A window for {boss.upper()} is open NOW!'
                     ch = discord.utils.find(
                         lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
                         self.bot.get_all_channels()
