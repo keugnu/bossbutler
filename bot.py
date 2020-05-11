@@ -7,7 +7,7 @@ import pytz
 from discord.ext import commands
 
 import utils
-from cog import alerts, settings, control, tasks, errors
+from cog import alerts, settings, control, tasks, info, errors
 
 
 class Bot(commands.Bot):
@@ -24,7 +24,7 @@ class Bot(commands.Bot):
 
     @staticmethod
     def add_cogs(bot):
-        any(map(bot.add_cog, (alerts.Alerts(bot), settings.Settings(bot), control.Control(bot), errors.ErrorHandler(bot))))
+        any(map(bot.add_cog, (alerts.Alerts(bot), settings.Settings(bot), control.Control(bot), info.Info(bot), errors.ErrorHandler(bot))))
 
     @staticmethod
     def start_tasks(bot):
