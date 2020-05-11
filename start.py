@@ -13,7 +13,7 @@ log = utils.setup_log()
 dotenv_path = utils.find(os.path.dirname(os.path.abspath(__file__)), '.env_debug' if sys.argv[1] == 'debug' else '.env')
 load_dotenv(dotenv_path)
 token = os.getenv('DISCORD_TOKEN')
-bot = Bot(pfx='!')
+bot = Bot(pfx='!', debug=True if sys.argv[1] == 'debug' else False)
 
 
 @bot.event

@@ -11,13 +11,14 @@ from cog import alerts, settings, control, tasks, errors
 
 
 class Bot(commands.Bot):
-    def __init__(self, pfx):
+    def __init__(self, pfx, debug=False):
         super().__init__(command_prefix=pfx)
 
+        self.debug = debug
         self.settings = None
         self.ffmpeg = shutil.which('ffmpeg')
-        self.settings_file = utils.find(os.path.dirname(__file__), 'settings.bin')
-        self.spawn_data_file = utils.find(os.path.dirname(__file__), 'spawn_data.bin')
+        self.settings_file = utils.find(os.path.dirname(__file__), 'settings-debug.bin' if debug is True else 'settings.bin')
+        self.spawn_data_file = utils.find(os.path.dirname(__file__), 'spawn_data-debug.bin' if debug is True else 'spawn_data.bin')
 
         assert os.path.exists(self.ffmpeg)
 
@@ -35,7 +36,7 @@ class Bot(commands.Bot):
             with open(bot.spawn_data_file):
                 return
         except (FileNotFoundError, TypeError):
-            bot.spawn_data_file = os.path.join(os.path.dirname(__file__), 'spawn_data.bin')
+            bot.spawn_data_file = os.path.join(os.path.dirname(__file__), 'spawn_data-debug.bin' if bot.debug is True else 'spawn_data.bin')
 
             with open(bot.spawn_data_file, 'wb') as f:
                 default_data = {
@@ -56,7 +57,7 @@ class Bot(commands.Bot):
 
     @staticmethod
     async def bootstrap_settings(bot):
-        bot.settings_file = os.path.join(os.path.dirname(__file__), 'settings.bin')
+        bot.settings_file = os.path.join(os.path.dirname(__file__), 'settings-debug.bin' if bot.debug is True else 'settings.bin')
         if not os.path.exists(bot.settings_file):
             with open(bot.settings_file, 'wb') as f:
                 marshal.dump({}, f)
