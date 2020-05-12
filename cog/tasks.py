@@ -7,6 +7,7 @@ import discord
 import pytz
 from discord.ext import commands, tasks
 
+import utils
 
 DAY_MAP = {
     0: 'Monday',
@@ -18,12 +19,12 @@ DAY_MAP = {
     6: 'Sunday'
 }
 
+
 class Tasks(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.log = logging.getLogger('bossbutler.cog.tasks')
         self.lock = asyncio.Lock()
-        self.was_reset_today = False
         self.tuesday_reset.start()
         self.death_integrity.start()
         self.commit_settings.start()
@@ -36,34 +37,47 @@ class Tasks(commands.Cog):
         self.commit_settings.cancel()
         self.check_windows.cancel()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(count=1)
     async def tuesday_reset(self):
-        """Overwrite last death to Tuesday 8AM PST"""
-        self.log = logging.getLogger('bossbutler.tasks')
+        """Overwrite last death to Tuesday 7AM PST"""
         self.log.debug('Running tuesday_reset.')
-        self.lock = asyncio.Lock()
-        today = datetime.datetime.today().astimezone(pytz.utc)
-        self.log.debug(today)
-        self.was_reset_today = False if today.weekday() == 2 else True
-        if not self.was_reset_today and today.weekday() == 1 and today.hour > 16:
-            self.was_reset_today = True
-            self.log.info('Today is Tuesday, after reset. Resetting the last death.')
-            reset_datetime = datetime.datetime(today.year, today.month, today.day, hour=16)
-            async with self.lock:
-                with open(self.bot.spawn_data_file, 'rb') as f:
-                    raw_data = marshal.load(f)
+        now = datetime.datetime.now().astimezone(pytz.utc)
+        self.log.debug(f'Now: {now}')
+        next_reset = utils.next_server_reset()
+        self.log.info('Today is Tuesday, after reset. Resetting all the last deaths.')
 
-                for boss, _ in raw_data.items():
-                    row = raw_data[boss]['down'][:-1] if raw_data[boss]['down'] else []
-                    row.append(reset_datetime.timestamp())
+        async with self.lock:
+            with open(self.bot.spawn_data_file, 'rb') as f:
+                raw_data = marshal.load(f)
+
+            for boss in raw_data.keys():
+                for i in ['', '2']:
+                    row = raw_data[boss]['down' + i][:-1] if raw_data[boss]['down' + i] else []
+                    row.append(next_reset.timestamp())
                     self.log.debug(f'Updated for {boss}: {row}')
-                    raw_data[boss].update({'down': row})
+                    raw_data[boss].update({'down' + i: row})
 
-                with open(self.bot.spawn_data_file, 'wb') as f:
-                    marshal.dump(raw_data, f)
-        else:
-            self.log.info(f'Not time for a reset. Today is {DAY_MAP[today.weekday()]}.')
+            with open(self.bot.spawn_data_file, 'wb') as f:
+                marshal.dump(raw_data, f)
+
         self.log.debug('Finished tuesday_reset.')
+        self.tuesday_reset.restart()
+
+    @tuesday_reset.before_loop
+    async def wait_for_server_reset(self):
+        next_reset = utils.next_server_reset()
+        async with self.lock:
+            with open(self.bot.spawn_data_file, 'rb') as f:
+                raw_data = marshal.load(f)
+
+        last_death = raw_data['azu']['down'][-1]
+        if last_death == next_reset.timestamp():
+            was_reset = True
+        else:
+            self.log.info('Looks like the deaths need to be reset.')
+            was_reset = False
+
+        return None if was_reset is False else await Tasks._wait_for_next_reset(next_reset)
 
     @tasks.loop(minutes=20)
     async def death_integrity(self):
@@ -135,3 +149,13 @@ class Tasks(commands.Cog):
                     await ch.send(msg)
 
         self.log.debug('Finished check_windows')
+
+    @staticmethod
+    async def _wait_for_next_reset(next_reset):
+        log = logging.getLogger('bossbutler.cog.tasks')
+        while datetime.datetime.now().astimezone(pytz.utc) > next_reset:
+            wait_for = (next_reset - datetime.datetime.now().astimezone(pytz.utc)).total_seconds()
+            if abs(wait_for) < 11 * 3600:   # wait for at least 11 hours
+                wait_for = 11 * 3600
+            log.debug(f'Waiting for {abs(wait_for)} seconds to check for server reset again.')
+            await asyncio.sleep(abs(wait_for) if wait_for < 86400 else 86400)

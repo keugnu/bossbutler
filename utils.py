@@ -1,9 +1,10 @@
+import datetime
 import os
 import logging
 import sys
-
 from logging import handlers
 
+import pytz
 from pytube import YouTube
 
 
@@ -39,3 +40,14 @@ def find(path, name):
     for root, _, files in os.walk(path):
         if name in files:
             return os.path.join(root, name)
+
+
+def next_server_reset():
+    now = datetime.datetime.now().astimezone(pytz.utc)
+    dst = bool(pytz.timezone('US/Eastern').localize(datetime.datetime.now()).dst())
+    tues_reset = datetime.datetime(now.year, now.month, now.day, hour=15 - dst, tzinfo=pytz.utc)
+
+    while tues_reset.weekday() != 1:
+        tues_reset += datetime.timedelta(1)
+
+    return tues_reset
