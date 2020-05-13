@@ -50,6 +50,10 @@ class Tasks(commands.Cog):
             with open(self.bot.spawn_data_file, 'rb') as f:
                 raw_data = marshal.load(f)
 
+            last_death = raw_data['azu']['down'][-1]
+            if self.bot._calculate_window(last_death).astimezone(pytz.utc) < next_reset - datetime.timedelta(3):
+                next_reset -= datetime.timedelta(7)
+
             for boss in raw_data.keys():
                 for i in ['', '2']:
                     row = raw_data[boss]['down' + i][:-1] if raw_data[boss]['down' + i] else []
@@ -64,20 +68,27 @@ class Tasks(commands.Cog):
         self.tuesday_reset.restart()
 
     @tuesday_reset.before_loop
-    async def wait_for_server_reset(self):
+    async def ensure_server_reset(self):
         next_reset = utils.next_server_reset()
-        async with self.lock:
-            with open(self.bot.spawn_data_file, 'rb') as f:
-                raw_data = marshal.load(f)
+        with open(self.bot.spawn_data_file, 'rb') as f:
+            raw_data = marshal.load(f)
 
         last_death = raw_data['azu']['down'][-1]
-        if last_death == next_reset.timestamp():
-            was_reset = True
+        if last_death == next_reset.timestamp():                                        # the last death is already overwritten
+            no_reset = True
+        elif (next_reset - datetime.timedelta(7)).timestamp() == last_death:            # (after server reset) the last death is already overwritten
+            no_reset = True
+        elif (next_reset - datetime.timedelta(7)).timestamp() > last_death:
+            self.log.warning(f'The death reset was missed!')
+            no_reset = False
+        elif next_reset > self.bot._calculate_window(last_death).astimezone(pytz.utc):  # the next server reset is after the next window
+            no_reset = True
         else:
-            self.log.info('Looks like the deaths need to be reset.')
-            was_reset = False
+            self.log.info('It looks like the deaths need to be reset.')
+            no_reset = False
 
-        return None if was_reset is False else await Tasks._wait_for_next_reset(next_reset)
+        if no_reset is True:
+            await Tasks._wait_for_next_reset(next_reset)
 
     @tasks.loop(minutes=20)
     async def death_integrity(self):
@@ -135,15 +146,15 @@ class Tasks(commands.Cog):
             now = datetime.datetime.now(pytz.timezone('US/Eastern'))
 
             for boss, window in windows:
-                if window.timestamp() < now.timestamp() + 3600 * 2:
+                if window < now + datetime.timedelta(hours=2):
                     self.log.info(f'{window} opens soon. now: {now}')
-                    remaining = window.timestamp() - now.timestamp()
+                    remaining = (window - now).total_seconds()
                     if remaining > 0:
                         msg = f'A window for {boss.upper()} is opens in {int(remaining / 3600)}h{int(remaining % 60)}m! It opens at {window.strftime("%H:%M %Z")}.'
                     elif remaining <= -3600 * 2:
                         msg = f'A window for {boss.upper()} is open NOW!'
                     ch = discord.utils.find(
-                        lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
+                        lambda i: i.name == 'bot-debug' and i.guild.name == "keugnu's server",
                         self.bot.get_all_channels()
                     )
                     await ch.send(msg)
@@ -153,9 +164,12 @@ class Tasks(commands.Cog):
     @staticmethod
     async def _wait_for_next_reset(next_reset):
         log = logging.getLogger('bossbutler.cog.tasks')
-        while datetime.datetime.now().astimezone(pytz.utc) > next_reset:
-            wait_for = (next_reset - datetime.datetime.now().astimezone(pytz.utc)).total_seconds()
-            if abs(wait_for) < 11 * 3600:   # wait for at least 11 hours
+
+        while datetime.datetime.now().astimezone(pytz.utc) < next_reset:
+            wait_for = abs((next_reset - datetime.datetime.now().astimezone(pytz.utc)).total_seconds())
+            if wait_for < 11 * 3600:   # wait for at least 11 hours
                 wait_for = 11 * 3600
-            log.debug(f'Waiting for {abs(wait_for)} seconds to check for server reset again.')
-            await asyncio.sleep(abs(wait_for) if wait_for < 86400 else 86400)
+            elif wait_for > 86400:  # wait for only 1 day
+                wait_for = 86400
+            log.debug(f'Waiting for {wait_for} seconds to check for server reset again.')
+            await asyncio.sleep(wait_for)

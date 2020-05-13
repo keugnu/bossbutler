@@ -12,7 +12,7 @@ class Info(commands.Cog):
 
     BOSS_NAMES = {
         'azu': 'Azurgos',
-        'kazz': 'Kazzak',
+        'kazz': 'Lord Kazzak',
         'green': 'Dragons of Nightmare',
     }
 
@@ -22,6 +22,8 @@ class Info(commands.Cog):
 
     @commands.command(aliases=['w'])
     async def windows(self, ctx):
+        now = datetime.datetime.now().astimezone(pytz.timezone('US/Eastern'))
+
         with open(self.bot.spawn_data_file, 'rb') as f:
             raw_data = marshal.load(f)
 
@@ -34,12 +36,12 @@ class Info(commands.Cog):
 
         resp = discord.Embed(
             title='Current World Boss Spawn Windows',
-            description='Windows open 84 hours after the last kill and 12 hours after the weekly server reset.\nThe next windows are:')
+            description='Windows open 72 hours after the last kill and 12 hours after the weekly server reset.\nThe next windows are:')
         resp.set_author(name='BossButler', icon_url=ctx.bot.user.avatar_url)
 
         for boss in windows.keys():
-            for i, date in enumerate(windows[boss]):
-                if date < datetime.datetime.now().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern')):
+            for i, window in enumerate(windows[boss]):
+                if window < now:
                     windows[boss][i] = 'NOW!'
 
             times = '\n'.join([w.strftime('%b %d %H:%M %Z') if isinstance(w, datetime.datetime) else w for w in windows[boss]])

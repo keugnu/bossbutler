@@ -126,9 +126,12 @@ class Bot(commands.Bot):
     def _calculate_window(time):
         last_death = datetime.datetime.fromtimestamp(time).replace(tzinfo=pytz.utc)
         tues_reset = utils.next_server_reset()
+        last_reset = tues_reset - datetime.timedelta(7)
 
-        if last_death + datetime.timedelta(days=3, hours=12) < tues_reset:
-            window = last_death + datetime.timedelta(days=3, hours=12)
+        if last_reset >= last_death:
+            window = last_reset + datetime.timedelta(hours=12)
+        elif last_death + datetime.timedelta(3) < tues_reset:
+            window = last_death + datetime.timedelta(3)
         else:
             window = tues_reset + datetime.timedelta(hours=12)
 
