@@ -55,11 +55,10 @@ class Tasks(commands.Cog):
                 next_reset -= datetime.timedelta(7)
 
             for boss in raw_data.keys():
-                for i in ['', '2']:
-                    row = raw_data[boss]['down' + i][:-1] if raw_data[boss]['down' + i] else []
-                    row.append(next_reset.timestamp())
-                    self.log.debug(f'Updated for {boss}: {row}')
-                    raw_data[boss].update({'down' + i: row})
+                row = raw_data[boss]['down'][:-1] if raw_data[boss]['down'] else []
+                row.append(next_reset.timestamp())
+                self.log.debug(f'Updated for {boss}: {row}')
+                raw_data[boss].update({'down': row})
 
             with open(self.bot.spawn_data_file, 'wb') as f:
                 marshal.dump(raw_data, f)
@@ -99,13 +98,9 @@ class Tasks(commands.Cog):
             raw_data = marshal.load(f)
 
         for boss in raw_data.keys():
-            if (
-                    raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')) or
-                    raw_data[boss].get('up2') and len(raw_data[boss].get('up2')) > len(raw_data[boss].get('down2'))
-            ):
+            if raw_data[boss].get('up') and len(raw_data[boss].get('up')) > len(raw_data[boss].get('down')):
                 self.log.warning(f'{boss} death data might be missing!')
                 self.log.debug(f'up: {raw_data[boss].get("up")}   down: {raw_data[boss].get("down")}')
-                self.log.debug(f'up2: {raw_data[boss].get("up2")}   down2: {raw_data[boss].get("down2")}')
                 ch = discord.utils.find(
                     lambda i: i.name == 'bot-test' and i.guild.name == "keugnu's server",
                     self.bot.get_all_channels()
@@ -139,8 +134,6 @@ class Tasks(commands.Cog):
             for boss, statuses in raw_data.items():
                 if statuses.get('down') and not len(statuses.get('up')) > len(statuses.get('down')):
                     windows.append((boss, self.bot._calculate_window(statuses.get('down')[-1])))
-                if statuses.get('down2') and not len(statuses.get('up2')) > len(statuses.get('down2')):
-                    windows.append((boss, self.bot._calculate_window(statuses.get('down2')[-1])))
 
             self.log.info(f'Next windows are {" | ".join("{} {}".format(k, v) for k, v in windows)}')
             now = datetime.datetime.now(pytz.timezone('US/Eastern'))

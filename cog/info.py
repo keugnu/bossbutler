@@ -31,8 +31,6 @@ class Info(commands.Cog):
         for boss, statuses in raw_data.items():
             if statuses.get('down'):
                 windows.update({boss: [self.bot._calculate_window(statuses.get('down')[-1])]})
-            if statuses.get('down2'):
-                windows[boss].append(self.bot._calculate_window(statuses.get('down2')[-1]))
 
         resp = discord.Embed(
             title='Current World Boss Spawn Windows',

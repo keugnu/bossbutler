@@ -34,18 +34,7 @@ class Bot(commands.Bot):
     def init_spawn_data(bot):
         try:
             with open(bot.spawn_data_file, 'rb') as f:
-                # update for layers
-                raw_data = marshal.load(f)
-                if len(raw_data.get('azu')) < 4:
-                    for boss in raw_data.keys():
-                        raw_data[boss].update(
-                            {
-                                'up2': [],
-                                'down2': []
-                            }
-                        )
-            with open(bot.spawn_data_file, 'wb') as f:
-                marshal.dump(raw_data, f)
+                pass
         except (FileNotFoundError, TypeError):
             bot.spawn_data_file = os.path.join(os.path.dirname(__file__), 'spawn_data-debug.bin' if bot.debug is True else 'spawn_data.bin')
 
@@ -54,20 +43,14 @@ class Bot(commands.Bot):
                     'azu': {
                         'up': [],
                         'down': [],
-                        'up2': [],
-                        'down2': []
                     },
                     'kazz': {
                         'up': [],
                         'down': [],
-                        'up2': [],
-                        'down2': []
                     },
                     'green': {
                         'up': [],
                         'down': [],
-                        'up2': [],
-                        'down2': []
                     }
                 }
                 marshal.dump(default_data, f)
@@ -114,8 +97,6 @@ class Bot(commands.Bot):
         with open(bot.spawn_data_file, 'rb') as f:
             raw_data = marshal.load(f)
 
-        if len(raw_data[boss].get(status)) > len(raw_data[boss].get(f'{status}2')):
-            status = f'{status}2'
         row = raw_data[boss][status]
         row.append(time)
         raw_data[boss].update({status: row})
