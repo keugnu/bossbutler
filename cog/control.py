@@ -38,17 +38,17 @@ class Control(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
-    async def join(self, ctx, channel: str):
+    async def join(self, ctx, *channel: str):
         """Immediately join a voice channel, leaving any other"""
+        ch_name = ' '.join(channel)
         self.log.debug(f'{ctx.author}:{ctx.command}:{ctx.message}')
-        self.log.info(f'{ctx.message.author} asked me to move to {channel}.')
-        await ctx.send(f'Joining {channel}.')
+        self.log.info(f'{ctx.message.author} asked me to move to {ch_name}.')
+        await ctx.send(f'Joining {ch_name}.')
         if ctx.voice_client:
             self.log.warn(f'I am already connected to {ctx.voice_client.channel}, but I will move anyways.')
             await ctx.voice_client.disconnect()
         try:
-            await discord.utils.get(ctx.guild.voice_channels, name=channel).connect()
+            await discord.utils.get(ctx.guild.voice_channels, name=ch_name).connect()
         except Exception as e:
-            self.log.exception(f'Cannot join {channel}: {e}')
-            raise commands.CommandError(f'Unable to join {channel}.')
+            self.log.exception(f'Cannot join {ch_name}: {e}')
+            raise commands.CommandError(f'Unable to join {ch_name}.')
