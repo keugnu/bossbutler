@@ -11,7 +11,7 @@ from discord.ext import commands
 class Info(commands.Cog):
 
     BOSS_NAMES = {
-        'azu': 'Azurgos',
+        'azu': 'Azuregos',
         'kazz': 'Lord Kazzak',
         'green': 'Dragons of Nightmare',
     }
